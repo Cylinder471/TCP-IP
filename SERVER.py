@@ -4,8 +4,9 @@ from configuration import *
 
 
 class Server:
-	def __init__(self, ipaddr, portn):
-
+	def __init__(self, ipaddr, portn, frame_size, buffer_size):
+		self.FRAME_SIZE = frame_size
+		self.BUFFER_SIZE = buffer_size
 		self.socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.socket_.bind((ipaddr, portn))
 		self.socket_.listen(5)
@@ -42,14 +43,13 @@ class Server:
 		retries_count = 0
 
 		while 1:
-
-			received_frame = received_socket.recv(BUFFER_SIZE).decode()
-
+			itr += 1
+			received_frame = received_socket.recv(self.BUFFER_SIZE).decode()
 			if received_frame == END_OF_FILE:
 				f.close()
 				l.close()
 				self.socket_.close()
-				print("File Received")
+				print("Файл принят")
 				return
 
 			if self.isCurrupted(received_frame):
@@ -65,7 +65,3 @@ class Server:
 
 				retries_count = 0
 				received_socket.send(ACCEPT.encode())
-
-if __name__ == "__main__":
-	newServer = Server(ipaddr="127.0.0.1", portn=3241)
-	newServer.receive_file(filepath="received_data.txt", logpath="logfile.txt")
