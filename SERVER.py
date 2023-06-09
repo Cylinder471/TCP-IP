@@ -4,6 +4,8 @@ from configuration import *
 
 
 class Server:
+	errorCount = 0
+	frameCount = 0
 	def __init__(self, ipaddr, portn, frame_size, buffer_size):
 		self.FRAME_SIZE = frame_size
 		self.BUFFER_SIZE = buffer_size
@@ -26,7 +28,8 @@ class Server:
 		return n.to_bytes((n.bit_length() + 7) // 8, 'big').decode()
 
 	def log(self, loghandle, itr, received_frame, retries_count):
-
+		self.errorCount += retries_count
+		self.frameCount = itr
 		loghandle.write("Frame Number : " + str(itr) + "\n")
 		loghandle.write("Frame Content : \"" +
 						self.decode(received_frame) + "\"\n")
@@ -46,6 +49,8 @@ class Server:
 			itr += 1
 			received_frame = received_socket.recv(self.BUFFER_SIZE).decode()
 			if received_frame == END_OF_FILE:
+				with open('results', 'w') as ff:
+					print(f"{self.errorCount}\n{self.frameCount}", file = ff)
 				f.close()
 				l.close()
 				self.socket_.close()
